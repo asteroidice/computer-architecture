@@ -37,9 +37,12 @@
 	sw $v0, var2
 
 	# Setup A, B, and -b
-	lw $t1, var1 		# Load A
-	lw $t2, var2 		# Load B
-	not $t3, $t2		# Calculate inverse of B
+	lw $t1, var1 				# Load A
+	andi $t1, 0x0000FFFF
+	lw $t2, var2 				# Load B
+	andi $t2, 0x0000FFFF
+
+	not $t3, $t2				# Calculate inverse of B
 	addi $t3, $t3, 1		# Add 1
 
 	# Shift B and -B accordingly.
@@ -59,18 +62,18 @@ start:
 	j do_nothing
 
 sub_B:
-	add $t1, $t1, $t3
+	addu $t1, $t1, $t3
 	j do_nothing
 
 add_B:
-	add $t1, $t1, $t2
+	addu $t1, $t1, $t2
 
 do_nothing:
 	srl $t1, $t1, 1
 
 	# keep track of the shifts. (This is some do while logic.)
 	addi $t6, $t6, 1		# Increment the counter
-	li $t7, 7				# load a constant into a register
+	li $t7, 17					# load a constant into a register
 	slt $a0, $t6, $t7		# set on less than (i < 7)
 	bne $a0, $zero, start	# If i = 7 then continue with the rest of the program.
 
