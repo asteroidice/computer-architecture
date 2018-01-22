@@ -9,15 +9,19 @@
 ## This program is written for 16 bit integers (small).
 
 .data
-	enter1: .asciiz "Enter Number 1\n Valid numbers are 65,536 >= x >= -65,537.\nX_1 = "
-	enter2: .asciiz "Enter Number 2\n Valid numbers are 65,536 >= x >= -65,537.\nX_2 = "
+	enter1: .asciiz "Enter Number 1\n Valid numbers are 65,536 >= X_1 >= -65,537.\nX_1 = "
+	enter2: .asciiz "Enter Number 2\n Valid numbers are 65,536 >= X_2 >= -65,537.\nX_2 = "
 	value: .word 0, 0, 0
 
 	var1: .word 0
 	var2: .word 0
 
+	count: .word 0
 
-.text
+
+	.text
+
+main:
 	la $t0, value
 
 	# Prompt and store val 1 in 0($t0)
@@ -50,10 +54,18 @@
 	sll $t3, $t3, 16
 
 start:
-	# Check the last two bits of B and goto the correct place
-	andi $t4, $t1, 3
-	li $t5, 0
-	beq $t4, $t5, do_nothing
+	# Concat the padding bit to the last bit of A($t1)
+	andi $t4, $t1, 1
+	sll $t4, $t4, 1
+	andi $t4, $t4, 2
+	or $t4, $t4, $t7
+
+	# 00 do_nothing
+	# 01 add_B
+	# 10 sub_B
+	# 11 do_nothing
+
+	# Compare $t4 to the above table.
 	li $t5, 1
 	beq $t4, $t5, add_B
 	li $t5, 2
@@ -69,12 +81,16 @@ add_B:
 	addu $t1, $t1, $t2
 
 do_nothing:
+	# add last bit to padding($t7)
+	andi $t7, $t1, 1
 	srl $t1, $t1, 1
 
 	# keep track of the shifts. (This is some do while logic.)
-	addi $t6, $t6, 1		# Increment the counter
-	li $t7, 17					# load a constant into a register
-	slt $a0, $t6, $t7		# set on less than (i < 7)
+	lw $t4, count
+	addi $t4, $t4, 1		# Increment the counter
+	sw $t4, count
+	li $t6, 17					# load a constant into a register
+	slt $a0, $t4, $t6		# set on less than (i < 7)
 	bne $a0, $zero, start	# If i = 7 then continue with the rest of the program.
 
 
