@@ -22,7 +22,11 @@
 	.text
 
 main:
+	# setup initial values
+	li $t0, 0
+	sw $t0, count
 	la $t0, value
+
 
 	# Prompt and store val 1 in 0($t0)
 	li $v0, 4
@@ -83,13 +87,13 @@ add_B:
 do_nothing:
 	# add last bit to padding($t7)
 	andi $t7, $t1, 1
-	srl $t1, $t1, 1
+	sra $t1, $t1, 1
 
 	# keep track of the shifts. (This is some do while logic.)
 	lw $t4, count
 	addi $t4, $t4, 1		# Increment the counter
 	sw $t4, count
-	li $t6, 17					# load a constant into a register
+	li $t6, 16					# load a constant into a register
 	slt $a0, $t4, $t6		# set on less than (i < 7)
 	bne $a0, $zero, start	# If i = 7 then continue with the rest of the program.
 
