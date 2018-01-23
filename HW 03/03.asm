@@ -1,21 +1,20 @@
-## Write a MIPS assembly language program that implements Booth’s multiplication algorithm.
-## Run it on the MARS or QTSpim simulatorswith a range of inputs to verify correct operation.
-## Program notes:
-##  a.Communicate clearly to the person running the program:
-##    i.How to enter the numbers to be multiplied.
-##    ii.How to terminate the program.
-##  b.Test your program with positive numbers, negative numbers, and 0.
+## Description: This program written using the MIPs instruction set prompts for two values A and B then computes their
+## product using booths algorithm.
 
-## This program is written for 16 bit integers (small).
+## Variables
+## $t1 - A
+## $t2 - B
+## $t3 - (-B)
+## $t4 - Count (number of shifts)
+## $t5 - Misc.
+## $t6 - Misc.
+## $t7 - Padding bit
 
 .data
-	enter1: .asciiz "Enter Number 1\n Valid numbers are 65,536 >= X_1 >= -65,537.\nX_1 = "
-	enter2: .asciiz "Enter Number 2\n Valid numbers are 65,536 >= X_2 >= -65,537.\nX_2 = "
-	value: .word 0, 0, 0
-
-	var1: .word 0
-	var2: .word 0
-
+	enter1: .asciiz "Enter Number 1\n Valid numbers are 65,536 >= A >= -65,537.\nA = "
+	enter2: .asciiz "Enter Number 2\n Valid numbers are 65,536 >= B >= -65,537.\nB = "
+	var1: .word 0			#	The value for A
+	var2: .word 0			# The value for B
 	count: .word 0
 
 
@@ -25,10 +24,9 @@ main:
 	# setup initial values
 	li $t0, 0
 	sw $t0, count
-	la $t0, value
 
 
-	# Prompt and store val 1 in 0($t0)
+	# Prompt and store val 1 in var1
 	li $v0, 4
 	la $a0, enter1
 	syscall
@@ -36,7 +34,7 @@ main:
 	syscall            # read integer
 	sw $v0, var1
 
-	# Prompt and store val 2 in 2($t0)
+	# Prompt and store val 2 in var2
 	li $v0, 4
 	la $a0, enter2
 	syscall
@@ -45,15 +43,15 @@ main:
 	sw $v0, var2
 
 	# Setup A, B, and -b
-	lw $t1, var1 				# Load A
-	andi $t1, 0x0000FFFF
-	lw $t2, var2 				# Load B
+	lw $t1, var1 					# Load A
+	andi $t1, 0x0000FFFF	# Clear the upper 16 bits.
+	lw $t2, var2 					# Load B
 	andi $t2, 0x0000FFFF
 
-	not $t3, $t2				# Calculate inverse of B
+	not $t3, $t2				# invert the bits of B
 	addi $t3, $t3, 1		# Add 1
 
-	# Shift B and -B accordingly.
+	# Shift B and -B 16 bits to the left so they can be added to A
 	sll $t2, $t2, 16
 	sll $t3, $t3, 16
 
@@ -85,7 +83,7 @@ add_B:
 	addu $t1, $t1, $t2
 
 do_nothing:
-	# add last bit to padding($t7)
+	# add last bit of A ($t1) to padding ($t7)
 	andi $t7, $t1, 1
 	sra $t1, $t1, 1
 
